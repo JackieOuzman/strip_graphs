@@ -128,8 +128,36 @@ test$RI <- NA
 #join the files togther
 Dunn_strips_plotting <- rbind(Dunn_strips, test)
 
-ggplot(Dunn_strips_plotting, aes(DistOnLine, value, colour = name_strip))+
-  geom_point()
+unique(Dunn_strips_plotting$name_strip)
+
+
+Dunn_strips_plotting$name_strip <- factor(Dunn_strips_plotting$name_strip, 
+                              levels = c("0MESZ",
+                                         "25MESZ", 
+                                         "50MESZ",
+                                         "100MESZ"
+                                          ))
+
+
+
+ggplot(Dunn_strips_plotting, aes(DistOnLine, value, group = name_strip))+
+  geom_line(size=2, alpha=0.4, aes( color = name_strip ))+
+  #geom_line(size=2, aes(linetype = name_strip, color = name_strip ))+
+  #scale_linetype_manual(values=c("dashed", "dashed", "solid", "dashed"))+
+  scale_color_manual(values=c('darkgrey','green', "black", "blue"))+
+  theme_bw()+
+  labs(x= "distance along the strip (m)",
+       y = "yield t/ha",
+       title = "",
+       subtitle = "",
+       caption = "")+
+  theme(legend.position = "none") +
+  geom_point(data = filter(Dunn_strips_plotting, zone == 1), aes(DistOnLine, value), shape=1, size =2)+
+  geom_point(data = filter(Dunn_strips_plotting, zone == 2), aes(DistOnLine, value), shape=1, size =2)
+
+
+
+
 
 
 
@@ -163,5 +191,21 @@ Dunn_strips_partialGM <- Dunn_strips_partialGM %>%
     )
 
 
-ggplot(Dunn_strips_partialGM, aes(DistOnLine, partial_GM, colour = name_strip))+
-  geom_line()
+
+
+
+ggplot(Dunn_strips_partialGM, aes(DistOnLine, partial_GM, group = name_strip))+
+  geom_line(size=2, alpha=0.4, aes( color = name_strip ))+
+  #geom_line(size=2, aes(linetype = name_strip, color = name_strip ))+
+  #scale_linetype_manual(values=c("dashed", "dashed", "solid", "dashed"))+
+  scale_color_manual(values=c('darkgrey','green', "black", "blue"))+
+  theme_bw()+
+  labs(x= "distance along the strip (m)",
+       y = "partial GM ($ per ha)",
+       title = "",
+       subtitle = "",
+       caption = "")+
+  theme(legend.position = "none") +
+  #scale_y_continuous(labels = scales::percent_format(accuracy = 5L))
+  geom_point(data = filter(Dunn_strips_partialGM, zone == 1), aes(DistOnLine, partial_GM), shape=1, size =2)+
+  geom_point(data = filter(Dunn_strips_partialGM, zone == 2), aes(DistOnLine, partial_GM), shape=1, size =2)
