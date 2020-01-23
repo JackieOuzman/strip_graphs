@@ -6,7 +6,7 @@ library(readxl)
 library(PairedData)
 ### New approach using polygon to pull out raw yield data
 
-##Bring in my data
+##Bring in my data...
 
 name_of_path <-
   file.path("W:", "value_soil_testing_prj", "Yield_data", "Tim_McClelland", "Clover",  "Clover_yld_data0_50_100_seg_ID_zone1.csv")
