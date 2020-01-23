@@ -12,6 +12,8 @@ name_of_path <-
   file.path("W:", "value_soil_testing_prj", "Yield_data", "Tim_McClelland", "Clover",  "Clover_yld_data0_50_100_seg_ID_zone1.csv")
 clover_seg_ID <-read_csv(name_of_path)
 str(clover_seg_ID)
+clover_seg_ID <- as.data.frame(clover_seg_ID)
+
 ## remove all the values in the data set that won't be included in the analysis this is when distance on line = 0
 
 clover_seg_ID <- filter(clover_seg_ID,
@@ -22,7 +24,7 @@ clover_seg_ID <- filter(clover_seg_ID,
 clover_seg_ID <- filter(clover_seg_ID,
                         Yld_Mass_D != 0)
 
-clover_seg_ID$P_rate_as_factor <- as.factor(clover_seg_ID$P_Rate)
+
 
 
 ##### Method 2 Via Andrea ####
@@ -30,8 +32,8 @@ clover_seg_ID$P_rate_as_factor <- as.factor(clover_seg_ID$P_Rate)
 #Prep the data so I can check
 dim(clover_seg_ID) #5030
 clover_seg_ID_0vs50 <- filter(clover_seg_ID, P_Rate != 100 )
-clover_seg_ID_100vs50 <- filter(clover_seg_ID, P_Rate != 0 )
-
+clover_seg_ID_100vs50 <- filter(clover_seg_ID, P_Rate != 0 ) 
+str(clover_seg_ID_100vs50)
 
 # # a small subset that has equal number of values per treatment
 # test <- filter(clover_seg_ID_0vs100, SegmentID == 100:103)
@@ -52,7 +54,25 @@ min(clover_seg_ID_100vs50$SegmentID)
 
 
 #Now put it in the loop with my test data! - its not looping through everything ? try making a list
-for (i in min(clover_seg_ID_100vs50$SegmentID):max(clover_seg_ID_100vs50$SegmentID)){
+list <- min(clover_seg_ID_100vs50$SegmentID):max(clover_seg_ID_100vs50$SegmentID)
+list <- 1:20
+list <- 21:30
+list <- 31:40
+print(list)
+
+summary(clover_seg_ID_100vs50)
+unique(clover_seg_ID_100vs50$P_Rate)
+
+
+#something wrong with segment ID 20
+test <- filter(clover_seg_ID_100vs50, SegmentID == 20)
+count(filter(test, P_Rate == 50))
+count(filter(test, P_Rate == 100))
+
+
+
+for (i in list){
+#for (i in min(clover_seg_ID_100vs50$SegmentID):max(clover_seg_ID_100vs50$SegmentID)){
   #print(paste("segment_number is ", i))
   segment_data = subset(clover_seg_ID_100vs50, SegmentID == i)
   
