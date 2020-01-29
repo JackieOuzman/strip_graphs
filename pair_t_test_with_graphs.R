@@ -376,7 +376,7 @@ table2 <- tableGrob(head(table_segments))
  
  collection <- grid.arrange(segments, zone, strip, table1,table2, nrow = 5, 
               layout_matrix = cbind(c(2,2,5,1,1), c(3,3,4,1,1)))
-              #,top = textGrob("soil test area 1 whole strip (no soil test 2 area",gp=gpar(fontsize=20,font=3)))
+             
 collection
 graph_path <- file.path("//FSSA2-ADL/clw-share1/Microlab/value_soil_testing_prj/Yield_data/Tim_McClelland/Clover")
 ggsave(path= graph_path, filename = "collection.png", device = "png", 
