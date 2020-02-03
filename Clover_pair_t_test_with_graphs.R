@@ -180,14 +180,16 @@ segments <- ggplot(seg_ID_0vs50_100s50summary, aes(SegmentID , YLDMASSDR, group 
   scale_color_manual(values=c('darkgrey','green', 'blue'), name  ="P Rates")+
   theme_bw()+
   ylim(0.0,5)+
-  labs(x= "distance along the strip",
-       y = "yield t/ha",
+  labs(x= "Distance along the strip",
+       y = "Yield t/ha",
        title = "",
        subtitle = "",
        caption = "")+
 #  annotate("text", x = 75, y= 1,label = "No sampling in strip")
     annotate("rect", xmin = 99, xmax = 109, ymin = 0, ymax = 5,
-            alpha = .2) #+
+            alpha = .2) +
+    annotate("text", x = 104, y= 1,label = "Low")+
+    annotate("text", x = 60, y= 1,label = "Some missing data")#+
 #    annotate("rect", xmin = 76, xmax = 85, ymin = 0, ymax = 6,
 #             alpha = .2)
 
@@ -242,7 +244,7 @@ strip_avres0vs50_sig <-
    data.frame(P_value = as.double(strip_avr_res0vs50$p.value),
               Mean_diff = (strip_avr_res0vs50$estimate)) %>%
    mutate(
-     rounded = round(Mean_diff, 2),
+     rounded = abs(round(Mean_diff, 2)),
      significant = case_when(P_value < 0.05 ~ "significant",
                         TRUE ~ "not significant"))
 strip_avres0vs50_sig
@@ -251,16 +253,17 @@ strip_avres100vs50_sig <-
    data.frame(P_value = as.double(strip_av_res100vs50$p.value),
               Mean_diff = as.double(strip_av_res100vs50$estimate)) %>%
    mutate(
-     rounded = round(Mean_diff, 2),
+     rounded = abs(round(Mean_diff, 2)),
      significant = case_when(P_value < 0.05 ~ "significant",
                         TRUE ~ "not significant")) 
 strip_av_res100vs50 
 strip_avres100vs50_sig
  
- p_vlaue_text_strip <- paste0("P value 0 vs 50 Mean difference = ", strip_avres0vs50_sig$rounded, " ", 
-                              strip_avres0vs50_sig$significant, "\n",
-                             "P value 100 vs 50  Mean difference = ", strip_avres100vs50_sig$rounded, " ", 
+p_vlaue_text_strip <- paste0("Yield at P 50 is P 0 plus ", strip_avres0vs50_sig$rounded, " and is ", 
+                             strip_avres0vs50_sig$significant, "\n",
+                             "Yield at P 100 is P 50 plus ", strip_avres100vs50_sig$rounded, " and is ", 
                              strip_avres100vs50_sig$significant, collapse = "\n")
+
  print(p_vlaue_text_strip)
 
  Pvalue_on_graph <- grobTree(textGrob(p_vlaue_text_strip, x=0.1,  y=0.1, hjust=0,
@@ -300,18 +303,19 @@ strip_avres100vs50_sig
  
  #Make an empty plot
  empty <- ggplot( strip_av, aes(P_Rate_as_factor, YLDMASSDR))+
- # +
- #   geom_boxplot(alpha=0.1)+
- #   geom_point(colour = "blue", alpha = 0.1)+
- #   theme_bw()+
- #   ylim(0.0,5)+
- #   theme(axis.text=element_text(size=8),
- #         axis.title=element_text(size=10,))+
-    labs(x = "P rate",
-         y= "Yield t/ha",
-         title = "Zone strip")+
-      annotate("text", x = 75, y= 1,label = "No sampling in strip")
-   empty  
+   # +
+   #   geom_boxplot(alpha=0.1)+
+   #   geom_point(colour = "blue", alpha = 0.1)+
+   theme_bw()+
+   ylim(0.0,5)+
+   xlim("0", "50", "100")+
+   #   theme(axis.text=element_text(size=8),
+   #         axis.title=element_text(size=10,))+
+   labs(x = "P rate",
+        y= "Yield t/ha",
+        title = "Zone strip")+
+   annotate("text", x = 75, y= 3,label = "No sampling in strip")
+ empty  
  ##### Paired t test for zone strip LOW ####
  
  ##average the yield values in each line segment - this ensure I have the same number of points
@@ -349,10 +353,11 @@ zone_low_av$P_Rate_as_factor <- as.factor(zone_low_av$P_Rates)
    data.frame(P_value = as.double(zone_low_avres0vs50$p.value),
               Mean_diff = (zone_low_avres0vs50$estimate)) %>%
    mutate(
-     rounded = round(Mean_diff, 2),
+     rounded = abs(round(Mean_diff, 2)),
      Significant = case_when(P_value < 0.05 ~ "significant",
                         TRUE ~ "not significant"))
  zone_low_avres100vs50 
+ 
  
  zone_low_avres100vs50_sig <-
    data.frame(P_value = as.double(zone_low_avres100vs50$p.value),
@@ -364,11 +369,11 @@ zone_low_av$P_Rate_as_factor <- as.factor(zone_low_av$P_Rates)
  
  zone_low_avres100vs50_sig
  
- p_vlaue_text_zone_low <- paste0("P value 0 vs 50 Mean difference = ", zone_low_avres0vs50_sig$rounded, " ", 
-                             zone_low_avres0vs50_sig$Significant, "\n",
-                        "P value 100 vs 50  Mean difference = ", zone_low_avres100vs50_sig$rounded, " ", 
-                        zone_low_avres100vs50_sig$Significant, collapse = "\n")
- print(p_vlaue_text_zone_low)
+ p_vlaue_text_zone_low <- paste0("Yield at P 50 is P 0 plus ", zone_low_avres0vs50_sig$rounded, " and is ", 
+                                 zone_low_avres0vs50_sig$Significant, "\n",
+                                 "Yield at P 100 is P 50 minus ", zone_low_avres100vs50_sig$rounded, " and is ", 
+                                 zone_low_avres100vs50_sig$Significant, collapse = "\n")
+ p_vlaue_text_zone_low
  library(grid)
  Pvalue_on_graph <- grobTree(textGrob(p_vlaue_text_zone_low, x=0.1,  y=0.10, hjust=0,
                                       gp=gpar(col="black", fontsize=6, fontface="italic")))
@@ -387,7 +392,7 @@ zone_low_av$P_Rate_as_factor <- as.factor(zone_low_av$P_Rates)
          axis.title=element_text(size=10,))+
    labs(x = "P rate",
         y= "Yield t/ha",
-        title = "Zone 1 - low")+
+        title = "Zone 1 - Low")+
    annotation_custom(Pvalue_on_graph)
  
  ##save the results of the zone strip work
@@ -490,7 +495,7 @@ zone_low_av$P_Rate_as_factor <- as.factor(zone_low_av$P_Rates)
  #bring in data from the most current database
 
  name_of_path_database <-
-   file.path("W:", "value_soil_testing_prj", "data_base", "N&P 2019 data for analysis Vic and SA latest.xlsx")
+   file.path("W:", "value_soil_testing_prj", "data_base", "NP 2019 data for analysis Vic and SA latest.xlsx")
  
  harm_database <- read_excel(name_of_path_database, sheet = "2019 full data", range = "A1:N480")
  str(harm_database)
@@ -524,14 +529,11 @@ zone_low_av$P_Rate_as_factor <- as.factor(zone_low_av$P_Rates)
  
 TSpecial <- ttheme_minimal(base_size = 8)
 table1 <- tableGrob(Tim_McClelland_clover , rows = NULL, theme=TSpecial )
-table2 <- tableGrob(table_segments, rows = NULL, theme=TSpecial)
+
 
 #get the name of the paddock...
-
-
 paddock <- "Clover"
-paddock_for_collection <- grobTree(textGrob(paddock, x=0.1,  y=0.90, hjust=0,
-                                          gp=gpar(col="black", fontsize=12)))
+test <- textGrob(paddock)
 
  ####################################################################################################################################
  ## Arrange the outputs onto one page
@@ -540,13 +542,13 @@ zone_low
 #zone_high No zone
 empty
 strip
-table_segments
 Tim_McClelland_clover
  
-collection <- grid.arrange(segments, zone_low, strip, table1 ,table2, nrow = 5, 
-              layout_matrix = cbind(c(2,2,5,1,1), c(3,3,4,1,1)),
-              bottom = paddock_for_collection)
-             
+collection <- grid.arrange(zone_low, strip, table1, segments, test,  nrow = 5, 
+                           layout_matrix = cbind(c(1,1,5,4,4), c(2,2,3,4,4)))
+
+
+
 collection
 #graph_path <- file.path("//FSSA2-ADL/clw-share1/Microlab/value_soil_testing_prj/Yield_data/Tim_McClelland/Clover")
 ggsave(path= graph_path, filename = "collection.png", device = "png", 
