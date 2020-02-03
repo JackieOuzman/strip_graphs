@@ -177,12 +177,12 @@ segments <- ggplot(seg_ID_0vs50_100s50summary, aes(SegmentID , YLDMASSDR, group 
   scale_color_manual(values=c('darkgrey','green', 'blue'), name  ="P Rates")+
   theme_bw()+
   ylim(0.0,6)+
-  labs(x= "distance along the strip",
-       y = "yield t/ha",
+  labs(x= "Distance along the strip",
+       y = "Yield t/ha",
        title = "",
        subtitle = "",
        caption = "")+
-  annotate("text", x = 75, y= 1,label = "No sampling in strip")
+  annotate("text", x = 75, y= 1,label = "Missing data")
 # +
 #    annotate("rect", xmin = 35, xmax = 45, ymin = 0, ymax = 6,
 #            alpha = .2) +
@@ -240,7 +240,7 @@ strip_avres0vs50_sig <-
    data.frame(P_value = as.double(strip_avr_res0vs50$p.value),
               Mean_diff = (strip_avr_res0vs50$estimate)) %>%
    mutate(
-     rounded = round(Mean_diff, 2),
+     rounded = abs(round(Mean_diff, 2)),
      significant = case_when(P_value < 0.05 ~ "significant",
                         TRUE ~ "not significant"))
 strip_avres0vs50_sig
@@ -249,15 +249,15 @@ strip_avres100vs50_sig <-
    data.frame(P_value = as.double(strip_av_res100vs50$p.value),
               Mean_diff = as.double(strip_av_res100vs50$estimate)) %>%
    mutate(
-     rounded = round(Mean_diff, 2),
+     rounded = abs(round(Mean_diff, 2)),
      significant = case_when(P_value < 0.05 ~ "significant",
                         TRUE ~ "not significant")) 
-strip_av_res100vs50 
+
 strip_avres100vs50_sig
  
- p_vlaue_text_strip <- paste0("P value 0 vs 50 Mean difference = ", strip_avres0vs50_sig$rounded, " ", 
+ p_vlaue_text_strip <- paste0("Yield at P 50 is P 0 minus ", strip_avres0vs50_sig$rounded, " and is ", 
                               strip_avres0vs50_sig$significant, "\n",
-                             "P value 100 vs 50  Mean difference = ", strip_avres100vs50_sig$rounded, " ", 
+                             "Yield at P 100 is P 50 plus ", strip_avres100vs50_sig$rounded, " and is ", 
                              strip_avres100vs50_sig$significant, collapse = "\n")
  print(p_vlaue_text_strip)
 
@@ -301,14 +301,15 @@ strip_avres100vs50_sig
  # +
  #   geom_boxplot(alpha=0.1)+
  #   geom_point(colour = "blue", alpha = 0.1)+
- #   theme_bw()+
- #   ylim(0.0,5)+
+    theme_bw()+
+    ylim(0.0,5)+
+    xlim("0", "50", "100")+
  #   theme(axis.text=element_text(size=8),
  #         axis.title=element_text(size=10,))+
     labs(x = "P rate",
          y= "Yield t/ha",
          title = "Zone strip")+
-      annotate("text", x = 75, y= 1,label = "No sampling in strip")
+      annotate("text", x = 75, y= 3,label = "No sampling in strip")
    empty  
  ##### Paired t test for zone strip LOW ####
  
@@ -485,7 +486,7 @@ zone_low_av$P_Rate_as_factor <- as.factor(zone_low_av$P_Rates)
  #bring in data from the most current database
 
  name_of_path_database <-
-   file.path("W:", "value_soil_testing_prj", "data_base", "N&P 2019 data for analysis Vic and SA latest.xlsx")
+   file.path("W:", "value_soil_testing_prj", "data_base", "NP 2019 data for analysis Vic and SA latest.xlsx")
  
  harm_database <- read_excel(name_of_path_database, sheet = "2019 full data", range = "A1:N480")
  str(harm_database)
@@ -518,7 +519,7 @@ zone_low_av$P_Rate_as_factor <- as.factor(zone_low_av$P_Rates)
  
 TSpecial <- ttheme_minimal(base_size = 8)
 table1 <- tableGrob(Tim_McClelland_Top , rows = NULL, theme=TSpecial )
-table2 <- tableGrob(table_segments, rows = NULL, theme=TSpecial)
+
 
 #get the name of the paddock...
 paddock <- filter(harm_database,
@@ -530,7 +531,7 @@ paddock <- "Top"
 paddock_for_collection <- grobTree(textGrob(paddock, x=0.1,  y=0.90, hjust=0,
                                           gp=gpar(col="black", fontsize=12)))
 
-paddock_for_collection
+test <- textGrob(paddock)
  ####################################################################################################################################
  ## Arrange the outputs onto one page
 segments
@@ -538,13 +539,12 @@ segments
 #zone_high No zone
 empty
 strip
-table_segments
+test
 Tim_McClelland_Top
+collection <- grid.arrange(strip, empty, table1, segments, test,  nrow = 5, 
+                           layout_matrix = cbind(c(1,1,5,4,4), c(2,2,3,4,4)))
+
  
-collection <- grid.arrange(segments, strip, empty, table1 ,table2, nrow = 5, 
-              layout_matrix = cbind(c(2,2,5,1,1), c(3,3,4,1,1)),
-              bottom = paddock_for_collection)
-             
 collection
 #graph_path <- file.path("//FSSA2-ADL/clw-share1/Microlab/value_soil_testing_prj/Yield_data/Tim_McClelland/Clover")
 ggsave(path= graph_path, filename = "collection.png", device = "png", 
