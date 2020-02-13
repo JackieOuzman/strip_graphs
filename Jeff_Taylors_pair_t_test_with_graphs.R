@@ -636,6 +636,6 @@ Jeff_Taylors
              
 collection
 
-ggsave(path= graph_path, filename = "collection.png", device = "png", 
+ggsave(path= graph_path, filename = paste0(paddock, "_collection.png"), device = "png", 
        width = 21, height = 15, units = "cm", collection)
  
