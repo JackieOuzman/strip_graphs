@@ -22,36 +22,47 @@ seg_ID <-read_csv(name_of_path)
 
 graph_path <- file.path("W:", "value_soil_testing_prj", "Yield_data", "Jeff_Braun", "Taylor")
 seg_ID
-#change clm heading to match YldMassDry and zone
-seg_ID <- rename(seg_ID,"YldMassDry" = "DryYield",
-              zone =  Zone)
 
-unique(seg_ID$zone)
-str(seg_ID)
 
-## remove all the values in the data set that won't be included in the analysis this is when distance on line = 0
 
-seg_ID <- filter(seg_ID,
-                        DistOnLine != 0)
-
-#The farmer practice wasnt really a true strip but I want to use the data so I need to remove row when we have no yield
-
-seg_ID <- filter(seg_ID,
-                        Yld_Mass_D != 0)
 
 
 ###########################################################################################################################
+### set up data so its generic
 
-##### t test per segment in the strip Via Andrea method####
+#Define the rates
 unique(seg_ID$P_Rates)
 str(seg_ID)
-
-test <- filter(seg_ID, P_Rates == 160)
-count(test)
 
 Grower_rate = 80
 rate1 = 0
 rate2 = 160
+
+#Define the zones
+unique(seg_ID$zone)
+zone1 <- "Taylor Red"
+zone2 <- "Taylor Grey"
+
+#change clm heading to match YldMassDry and zone
+seg_ID <- rename(seg_ID,"YldMassDry" = "DryYield",
+                 zone =  Zone)
+
+
+############################################################################################################################
+### clean the data removing zero values
+unique(seg_ID$zone)
+str(seg_ID)
+
+## remove all the values in the data set that won't be included in the analysis this is when distance on line = 0
+seg_ID <- filter(seg_ID,
+                 DistOnLine != 0)
+
+#The farmer practice wasnt really a true strip but I want to use the data so I need to remove row when we have no yield
+seg_ID <- filter(seg_ID,
+                 Yld_Mass_D != 0)
+
+#############################################################################################################################
+##### t test per segment in the strip Via Andrea method####
 
 #Prep the data so I can check what am I testing (look at Harms list)
 head(seg_ID)
@@ -172,11 +183,11 @@ str(seg_ID_rate1_2vsGR_summary)
 unique(seg_ID_rate1_2vsGR_summary$zone)
 
 #what is the area of the zones this can be added to the graph?
-filter(seg_ID_rate1_2vsGR_summary, zone == "Taylor Grey") %>% 
+filter(seg_ID_rate1_2vsGR_summary, zone == zone1) %>% 
   summarise(min_zone = min(SegmentID),
             max_zone = max(SegmentID))
 
-filter(seg_ID_rate1_2vsGR_summary, zone == "Taylor Red") %>% 
+filter(seg_ID_rate1_2vsGR_summary, zone == zone2) %>% 
   summarise(min_zone = min(SegmentID),
             max_zone = max(SegmentID))
 head(seg_ID_rate1_2vsGR_summary)
@@ -200,13 +211,13 @@ segments <- ggplot(seg_ID_rate1_2vsGR_summary, aes(SegmentID , YldMassDry, group
        title = "",
        subtitle = "",
        caption = "")+
-   annotate("rect", xmin = 1, xmax = 11, ymin = 0, ymax = 4,
+   annotate("rect", xmin = 1, xmax = 11, ymin = 0, ymax = 4, #Zone 1
            alpha = .2) +
-  annotate("text", x = 5, y= 1,label = "Grey")+
+  annotate("text", x = 5, y= 1,label = zone1)+
   
-   annotate("rect", xmin = 90, xmax = 99, ymin = 0, ymax = 4,
+   annotate("rect", xmin = 90, xmax = 99, ymin = 0, ymax = 4, #zone 2
             alpha = .2)+
-  annotate("text", x = 95, y= 1,label = "Red")+
+  annotate("text", x = 95, y= 1,label = zone2)+
   annotate("text", x = 40, y= 1,label = "Missing data")
 
 
@@ -217,12 +228,14 @@ segments #this is the graph
 ggsave(path= graph_path, filename = "t-test_segments.png", device = "png" ,
        width = 20, height = 10, units = "cm")
 
-write.csv(seg_ID_0vs50_100s50summary, paste0(graph_path,"/t_test_segments.csv"))
+write.csv(seg_ID_rate1_2vsGR_summary, paste0(graph_path,"/t_test_segments.csv"))
 write.csv(table_segments, paste0(graph_path,"/table_segments.csv"))
 
 
 
 ##########################################################################################################################################
+###ONLY DO THIS STEP IF WE ARE MISSING ZONE DATA
+
 ##### Paired t test for whole strip ####
 
 ##average the yield values in each line segment - this ensure I have the same number of points
@@ -283,11 +296,12 @@ strip_rate2vsGR_res_sig <-
 strip_rate2vsGR_res_sig
 
 
-p_vlaue_text_strip <- paste0("Yield at P 80 is P 0 plus ", strip_rate1vsGR_res_sig$rounded, " and is ", 
+p_vlaue_text_strip <- paste0("Yield at P ", rate1, " is  P ", Grower_rate,  " plus ", strip_rate1vsGR_res_sig$rounded, " and is ", 
                              strip_rate1vsGR_res_sig$significant, "\n",
-                                 
-                              "Yield at P 160 is P 80 minus ", strip_rate2vsGR_res_sig$rounded, " and is ", 
+                             
+                             "Yield at P ", Grower_rate, " is  P ", rate2 ,  " minus ", strip_rate2vsGR_res_sig$rounded, " and is ", 
                              strip_rate2vsGR_res_sig$significant, collapse = "\n")
+
  print(p_vlaue_text_strip)
 
  Pvalue_on_graph <- grobTree(textGrob(p_vlaue_text_strip, x=0.1,  y=0.90, hjust=0,
@@ -300,6 +314,8 @@ p_vlaue_text_strip <- paste0("Yield at P 80 is P 0 plus ", strip_rate1vsGR_res_s
 
  strip <- ggplot( strip_av, aes(P_Rate_as_factor, YldMassDry))+
    geom_boxplot(alpha=0.1)+
+   stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..),
+                width = .75, linetype = "dashed")+
    geom_point(colour = "blue", alpha = 0.1)+
    theme_bw()+
    ylim(0.0,4)+
@@ -315,20 +331,19 @@ p_vlaue_text_strip <- paste0("Yield at P 80 is P 0 plus ", strip_rate1vsGR_res_s
  strip
  ggsave(path= graph_path, filename = "t-test_whole_strip.png", device = "png" ,
         width = 20, height = 10, units = "cm")
- write.csv(seg_ID_0vs50_100s50summary, paste0(graph_path,"/t_test_strip_av.csv"))
+ write.csv(strip_av, paste0(graph_path,"/t_test_strip_av.csv"))
  
  
  
  
  
 
- ##### Paired t test for zone strip LOW ####
+ ##### Paired t test for zone strip Zone 1 ####
  
  ##average the yield values in each line segment - this ensure I have the same number of points
  unique(seg_ID$zone)
  
- 
- zone_1 <- filter(seg_ID, zone == "Taylor Red" )
+ zone_1 <- filter(seg_ID, zone == zone1 )
  zone_av_1 <- group_by(zone_1,SegmentID, P_Rates ) %>% 
    summarise_all(mean)
  
@@ -384,19 +399,30 @@ zone_av_1_rate2vsGR_res_sig <-
     rounded = abs(round(Mean_diff, 2)),
     Significant = case_when(P_value < 0.05 ~ "significant",
                             TRUE ~ "not significant"))
+zone_av_1_rate1vsGR_res_sig 
 zone_av_1_rate2vsGR_res_sig 
 
+# positive_negative_rate1_GRS <- 
+mean_zone_av_1 <-  group_by(zone_av_1, P_Rates) %>% 
+  summarise(mean(YldMassDry))
+mean_zone_av_1
+positive_neg_value_GR_rate1_zone1 <- ifelse(filter(mean_zone_av_1, P_Rates == Grower_rate) 
+                                            - filter(mean_zone_av_1, P_Rates == rate1)>0, "plus", "minus") 
+positive_neg_value_GR_rate1_zone1 <- positive_neg_value_GR_rate1_zone1[1,2]
+positive_neg_value_rate2_GR_zone1 <- ifelse(filter(mean_zone_av_1, P_Rates == rate2) 
+                                            - filter(mean_zone_av_1, P_Rates == Grower_rate)>0, "plus", "minus")
+positive_neg_value_rate2_GR_zone1 <- positive_neg_value_rate2_GR_zone1[1,2]
 
 
-p_vlaue_text_zone_1 <- paste0("Yield at P 80 is P 0 plus ", zone_av_1_rate1vsGR_res_sig$rounded, " and is ", 
-                                zone_av_1_rate1vsGR_res_sig$Significant, "\n",
-                             
-                             "Yield at P 160 is P 80 minus ", zone_av_1_rate2vsGR_res_sig$rounded, " and is ", 
-                             zone_av_1_rate2vsGR_res_sig$Significant, collapse = "\n")
 
- print(p_vlaue_text_zone_1)
- 
- 
+p_vlaue_text_zone_1 <- paste0("Yield at P ", rate1, " is  P ", Grower_rate, " " ,positive_neg_value_GR_rate1_zone1, " ", 
+                              zone_av_1_rate1vsGR_res_sig$rounded, " and is ", 
+                              zone_av_1_rate1vsGR_res_sig$Significant, "\n",
+                              
+                              "Yield at P ", Grower_rate, " is  P ", rate2 , " " ,positive_neg_value_rate2_GR_zone1, " ", 
+                              zone_av_1_rate2vsGR_res_sig$rounded, " and is ", 
+                              zone_av_1_rate2vsGR_res_sig$Significant, collapse = "\n")
+print(p_vlaue_text_zone_1)
  
  library(grid)
  Pvalue_on_graph <- grobTree(textGrob(p_vlaue_text_zone_1, x=0.1,  y=0.10, hjust=0,
@@ -405,18 +431,20 @@ p_vlaue_text_zone_1 <- paste0("Yield at P 80 is P 0 plus ", zone_av_1_rate1vsGR_
  
  
  
- # Compute t-test - this is done for 0 vs 100 for all values in the strip
+ # Compute t-test - this is done for rate1 vs GS for all values in the strip
  zone_av_1
  zone_1 <- ggplot( zone_av_1, aes(P_Rate_as_factor, YldMassDry))+
    geom_boxplot(alpha=0.1)+
    geom_point(colour = "blue", alpha = 0.1)+
+   stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..),
+                width = .75, linetype = "dashed")+
    theme_bw()+
    ylim(0.0,4)+
    theme(axis.text=element_text(size=8),
          axis.title=element_text(size=10,))+
    labs(x = "P rate",
         y= "Yield t/ha",
-        title = "Zone 1 - Red")+
+        title = zone1)+
    annotation_custom(Pvalue_on_graph)
  
  ##save the results of the zone strip work
@@ -429,10 +457,7 @@ p_vlaue_text_zone_1 <- paste0("Yield at P 80 is P 0 plus ", zone_av_1_rate1vsGR_
  ###########################################################################################################################################
  ##### Paired t test for zone strip 2 ####
  
- unique(seg_ID$zone)
- 
- 
- zone_2 <- filter(seg_ID, zone == "Taylor Grey" )
+ zone_2 <- filter(seg_ID, zone == zone2 )
  zone_av_2 <- group_by(zone_2,SegmentID, P_Rates ) %>% 
    summarise_all(mean)
  
@@ -446,8 +471,8 @@ p_vlaue_text_zone_1 <- paste0("Yield at P 80 is P 0 plus ", zone_av_1_rate1vsGR_
  
  
  zone_av_2 
- zone_av_2_rate1vsGR <- filter(zone_av_2, P_Rates == rate1 | P_Rates== Grower_rate )
- zone_av_2_rate2vsGR <- filter(zone_av_2, P_Rates == rate2 | P_Rates== Grower_rate )
+ zone_av_2_rate1vsGR <- filter(zone_av_2, P_Rates ==  rate1 | P_Rates==   Grower_rate)
+ zone_av_2_rate2vsGR <- filter(zone_av_2, P_Rates ==  rate2 | P_Rates==  Grower_rate )
  
  # http://www.sthda.com/english/wiki/paired-samples-t-test-in-r
  
@@ -488,19 +513,26 @@ p_vlaue_text_zone_1 <- paste0("Yield at P 80 is P 0 plus ", zone_av_1_rate1vsGR_
      rounded = abs(round(Mean_diff, 2)),
      Significant = case_when(P_value < 0.05 ~ "significant",
                              TRUE ~ "not significant"))
+ zone_av_2_rate1vsGR_res_sig 
  zone_av_2_rate2vsGR_res_sig 
  
  
+# positive_negative_rate1_GRS <- 
+ mean_zone_av_2 <-  group_by(zone_av_2, P_Rates) %>% 
+   summarise(mean(YldMassDry))
+ positive_neg_value_GR_rate1 <- ifelse(filter(mean_zone_av_2, P_Rates == Grower_rate) - filter(mean_zone_av_2, P_Rates == rate1)>0, "plus", "minus") 
+ positive_neg_value_GR_rate1 <- positive_neg_value_GR_rate1[1,2]
+ positive_neg_value_rate2_GR <- ifelse(filter(mean_zone_av_2, P_Rates == rate2) - filter(mean_zone_av_2, P_Rates == Grower_rate)>0, "plus", "minus")
+ positive_neg_value_rate2_GR <- positive_neg_value_rate2_GR[1,2]
  
- p_vlaue_text_zone_2 <- paste0("Yield at P 80 is P 0 plus ", zone_av_2_rate1vsGR_res_sig$rounded, " and is ", 
+
+ 
+ p_vlaue_text_zone_2 <- paste0("Yield at P ", rate1, " is  P ", Grower_rate, " " ,positive_neg_value_GR_rate1, " ", zone_av_2_rate1vsGR_res_sig$rounded, " and is ", 
                                zone_av_2_rate1vsGR_res_sig$Significant, "\n",
                                
-                               "Yield at P 160 is P 80 minus ", zone_av_1_rate2vsGR_res_sig$rounded, " and is ", 
+                               "Yield at P ", Grower_rate, " is  P ", rate2 , " " ,positive_neg_value_rate2_GR, " ", zone_av_2_rate2vsGR_res_sig$rounded, " and is ", 
                                zone_av_2_rate2vsGR_res_sig$Significant, collapse = "\n")
- 
  print(p_vlaue_text_zone_2)
- 
- 
  
  library(grid)
  Pvalue_on_graph <- grobTree(textGrob(p_vlaue_text_zone_2, x=0.1,  y=0.10, hjust=0,
@@ -509,25 +541,28 @@ p_vlaue_text_zone_1 <- paste0("Yield at P 80 is P 0 plus ", zone_av_1_rate1vsGR_
  
  
  
- # Compute t-test - this is done for 0 vs 100 for all values in the strip
+ # Compute t-test - this is done for rate1 vs GS for all values in the strip
  zone_av_2
  zone_2 <- ggplot( zone_av_2, aes(P_Rate_as_factor, YldMassDry))+
    geom_boxplot(alpha=0.1)+
    geom_point(colour = "blue", alpha = 0.1)+
+   stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..),
+                width = .75, linetype = "dashed")+
    theme_bw()+
    ylim(0.0,4)+
    theme(axis.text=element_text(size=8),
          axis.title=element_text(size=10,))+
    labs(x = "P rate",
         y= "Yield t/ha",
-        title = "Zone 2 - Grey")+
+        title = zone2)+
    annotation_custom(Pvalue_on_graph)
  
  ##save the results of the zone strip work
  zone_2
- ggsave(path= graph_path, filename = "t-test_zone_grey_strip.png", device = "png" ,
+ ggsave(path= graph_path, filename = "t-test_zone_zone2_strip.png", device = "png" ,
         width = 20, height = 10, units = "cm")
- write.csv(zone_av_2, paste0(graph_path,"/t_testzone_grey_av.csv"))
+ write.csv(zone_av_2, paste0(graph_path,"/t_testzone_zone2_av.csv"))
+ 
  
  
 #####################################################################################################################################
@@ -559,19 +594,34 @@ p_vlaue_text_zone_1 <- paste0("Yield at P 80 is P 0 plus ", zone_av_1_rate1vsGR_
  str(harm_database)
 Jeff_Taylors <- filter(harm_database,
                        Farmer == "Ian Taylor") %>% 
-   dplyr::select(4: 11)
+   dplyr::select(4, 6: 11)
 
 
 Jeff_Taylors
- 
- 
+
+#make a table of the mean yield for zones
+names(mean_zone_av_1) <- c("Rates", zone1)
+names(mean_zone_av_2) <- c("Rates", zone2)
+
+mean_zone_av_1_2 <- left_join(mean_zone_av_1, mean_zone_av_2)
+mean_zone_av_1_2 <- round(mean_zone_av_1_2,2)
+mean_zone_av_1_2 <-  lapply(mean_zone_av_1_2, as.character)
+mean_zone_av_1_2 <- as.data.frame(mean_zone_av_1_2 )
+
+  
+mean_zone_av_1_2
+
+
   TSpecial <- ttheme_minimal(base_size = 8)
 table1 <- tableGrob(Jeff_Taylors , rows = NULL, theme=TSpecial )
-#table2 <- tableGrob(table_segments, rows = NULL, theme=TSpecial)
+table2 <- tableGrob(mean_zone_av_1_2, rows = NULL, theme=TSpecial)
 
 #get the name of the paddock...
 
 paddock <- "Taylor"
+
+
+library(DT)
 test <- textGrob(paddock)
  ####################################################################################################################################
  ## Arrange the outputs onto one page
@@ -581,7 +631,7 @@ zone_2
 paddock
 
 Jeff_Taylors
- collection <- grid.arrange(zone_1, zone_2,  table1, segments, test,  nrow = 5, 
+ collection <- grid.arrange(zone_1, zone_2,  table1, segments, table2,  nrow = 5, 
               layout_matrix = cbind(c(1,1,5,4,4), c(2,2,3,4,4)))
              
 collection
