@@ -415,11 +415,11 @@ positive_neg_value_rate2_GR_zone1 <- positive_neg_value_rate2_GR_zone1[1,2]
 
 
 
-p_vlaue_text_zone_1 <- paste0("Yield at P ", rate1, " is  P ", Grower_rate, " " ,positive_neg_value_GR_rate1_zone1, " ", 
+p_vlaue_text_zone_1 <- paste0("Yield at P ", Grower_rate, " is  P ", rate1, " " ,positive_neg_value_GR_rate1_zone1, " ", 
                               zone_av_1_rate1vsGR_res_sig$rounded, " and is ", 
                               zone_av_1_rate1vsGR_res_sig$Significant, "\n",
                               
-                              "Yield at P ", Grower_rate, " is  P ", rate2 , " " ,positive_neg_value_rate2_GR_zone1, " ", 
+                              "Yield at P ", rate2, " is  P ", Grower_rate , " " ,positive_neg_value_rate2_GR_zone1, " ", 
                               zone_av_1_rate2vsGR_res_sig$rounded, " and is ", 
                               zone_av_1_rate2vsGR_res_sig$Significant, collapse = "\n")
 print(p_vlaue_text_zone_1)
@@ -527,10 +527,10 @@ print(p_vlaue_text_zone_1)
  
 
  
- p_vlaue_text_zone_2 <- paste0("Yield at P ", rate1, " is  P ", Grower_rate, " " ,positive_neg_value_GR_rate1, " ", zone_av_2_rate1vsGR_res_sig$rounded, " and is ", 
+ p_vlaue_text_zone_2 <- paste0("Yield at P ", Grower_rate, " is  P ", rate1, " " ,positive_neg_value_GR_rate1, " ", zone_av_2_rate1vsGR_res_sig$rounded, " and is ", 
                                zone_av_2_rate1vsGR_res_sig$Significant, "\n",
                                
-                               "Yield at P ", Grower_rate, " is  P ", rate2 , " " ,positive_neg_value_rate2_GR, " ", zone_av_2_rate2vsGR_res_sig$rounded, " and is ", 
+                               "Yield at P ", rate2, " is  P ", Grower_rate , " " ,positive_neg_value_rate2_GR, " ", zone_av_2_rate2vsGR_res_sig$rounded, " and is ", 
                                zone_av_2_rate2vsGR_res_sig$Significant, collapse = "\n")
  print(p_vlaue_text_zone_2)
  
