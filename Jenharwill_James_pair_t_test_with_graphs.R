@@ -241,7 +241,7 @@ str(seg_ID_rate1_2vsGR_summary)
 ### Plot the results 
 segments <- ggplot(seg_ID_rate1_2vsGR_summary, aes(SegmentID , YldMassDry, group = P_Rate_as_factor))+
   geom_line(size=1, alpha=0.4, aes( color = P_Rate_as_factor ))+
-  scale_color_manual(values=c('darkgrey','green', 'blue', 'red'), name  ="P Rates")+
+  scale_color_manual(values=c('darkgrey','green', 'blue', 'red'), name  ="N Rates")+
   theme_bw()+
   ylim(0.0,6)+
   labs(x= "Distance along the strip",
@@ -476,11 +476,11 @@ positive_neg_value_rate2_GR_zone1 <- positive_neg_value_rate2_GR_zone1[1,2]
 
 
 
-p_vlaue_text_zone_1 <- paste0("Yield at P ", Grower_rate, " is  P ", rate1, " " ,positive_neg_value_GR_rate1_zone1, " ", 
+p_vlaue_text_zone_1 <- paste0("Yield at N ", Grower_rate, " is  N ", rate1, " " ,positive_neg_value_GR_rate1_zone1, " ", 
                               zone_av_1_rate1vsGR_res_sig$rounded, " and is ", 
                               zone_av_1_rate1vsGR_res_sig$Significant, "\n",
                               
-                              "Yield at P ", rate2, " is  P ", Grower_rate, " " ,positive_neg_value_rate2_GR_zone1, " ", 
+                              "Yield at N ", rate2, " is  N ", Grower_rate, " " ,positive_neg_value_rate2_GR_zone1, " ", 
                               zone_av_1_rate2vsGR_res_sig$rounded, " and is ", 
                               zone_av_1_rate2vsGR_res_sig$Significant, collapse = "\n")
                               
@@ -507,7 +507,7 @@ print(p_vlaue_text_zone_1)
    ylim(2.5,6)+
    theme(axis.text=element_text(size=8),
          axis.title=element_text(size=10,))+
-   labs(x = "P rate",
+   labs(x = "N rate",
         y= "Yield t/ha",
         title = zone1)+
    annotation_custom(Pvalue_on_graph)
@@ -613,10 +613,10 @@ print(p_vlaue_text_zone_1)
  
 
  
- p_vlaue_text_zone_2 <- paste0("Yield at P ", Grower_rate, " is  P ", rate1, " " ,positive_neg_value_GR_rate1, " ", zone_av_2_rate1vsGR_res_sig$rounded, " and is ", 
+ p_vlaue_text_zone_2 <- paste0("Yield at N ", Grower_rate, " is  N ", rate1, " " ,positive_neg_value_GR_rate1, " ", zone_av_2_rate1vsGR_res_sig$rounded, " and is ", 
                                zone_av_2_rate1vsGR_res_sig$Significant, "\n",
                                
-                               "Yield at P ", rate2, " is  P ", Grower_rate, " " ,positive_neg_value_rate2_GR, " ", zone_av_2_rate2vsGR_res_sig$rounded, " and is ", 
+                               "Yield at N ", rate2, " is  N ", Grower_rate, " " ,positive_neg_value_rate2_GR, " ", zone_av_2_rate2vsGR_res_sig$rounded, " and is ", 
                                zone_av_2_rate2vsGR_res_sig$Significant, collapse = "\n")
                                
                                # "Yield at P ", rate3, " is  P ", Grower_rate , " " ,positive_neg_value_rate3_GR, " ", zone_av_2_rate3vsGR_res_sig$rounded, " and is ", 
@@ -641,7 +641,7 @@ print(p_vlaue_text_zone_1)
    ylim(2.5,6)+
    theme(axis.text=element_text(size=8),
          axis.title=element_text(size=10,))+
-   labs(x = "P rate",
+   labs(x = "N rate",
         y= "Yield t/ha",
         title = zone2)+
    annotation_custom(Pvalue_on_graph)
@@ -733,3 +733,94 @@ ggsave(path= graph_path, filename = paste0(paddock, "_collection.png"), device =
 
 
 ##########################################################################################################################################
+
+###DANS WORK
+#1. bring in the files and append file names
+
+mydir <- file.path("W:", "value_soil_testing_prj", "Yield_data", "Jenharwil", "James 2", "James 2_drop_box")
+myfiles = list.files(path = mydir,
+                     pattern = "*.csv",
+                     full.names = TRUE)
+
+myfiles
+
+Urea_0kgha_High <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 0kgha High.csv") %>% 
+  mutate(strip_name = "Urea_0kgha_High")
+Urea_0kgha_Low <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 0kgha Low.csv") %>% 
+  mutate(strip_name = "Urea_0kgha_Low")
+
+Urea_150kgh_High <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 150kgha High.csv") %>% 
+  mutate(strip_name = "Urea_150kgh_High")
+Urea_150kgh_Low <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 150kgha Low.csv") %>% 
+  mutate(strip_name = "Urea_150kgh_Low")
+
+
+Urea_80kgha_High <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 80kgha High.csv") %>% 
+  mutate(strip_name = "Urea_80kgha_High")
+Urea_80kgha_Low <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 80kgha Low.csv") %>% 
+  mutate(strip_name = "Urea_80kgha_Low")
+
+#Join togther
+James_Dans_wk <- rbind(Urea_0kgha_High,
+                       Urea_0kgha_Low,
+                       Urea_150kgh_High,
+                       Urea_150kgh_Low,
+                       Urea_80kgha_High,
+                       Urea_80kgha_Low)
+str(James_Dans_wk)
+James_Dans_wk <- James_Dans_wk[,6:7]
+#split the clm Urea_0kgha_High 0kgha
+James_Dans_wk <- separate(James_Dans_wk, strip_name, into = paste(c("Fert", "Rate", "zone"), sep = "_"))
+write.csv(James_Dans_wk, "W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/James_Dans_wk.csv")
+
+unique(James_Dans_wk$Rate)
+# James_Dans_wk <- mutate(James_Dans_wk,
+#                               Rate1 = case_when(
+#   Rate == "0kgha" ~ "0",
+#   Rate == "150kgh" ~ "150",
+#   Rate == "80kgha" ~ "80",
+#   TRUE ~ "Rate"))
+
+str(James_Dans_wk)
+unique(James_Dans_wk$Rate1)
+James_Dans_wk_summary <- group_by(James_Dans_wk, Rate, zone ) %>% 
+  summarise_all(mean)
+James_Dans_wk_summary
+
+
+James_Dans_wk$Rate1_as_factor <- as.factor(James_Dans_wk$Rate1)
+
+James_Dans_wk_summary_graph <- ggplot( James_Dans_wk, aes(Rate1_as_factor, Yld_Mass_D))+
+  geom_boxplot(alpha=0.1)+
+  geom_point(colour = "blue", alpha = 0.1)+
+  stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..),
+               width = .75, linetype = "dashed")+
+  theme_bw()+
+  ylim(2.5,6)+
+  theme(axis.text=element_text(size=8),
+        axis.title=element_text(size=10,))+
+  labs(x = "P rate",
+       y= "Yield t/ha",
+       title = "Dans")
+
+James_Dans_wk_summary_graph
+
+
+
+Urea_80kgha_High <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 80kgha High.csv") %>% 
+  mutate(strip_name = "Urea_80kgha_High")
+Urea_80kgha_Low <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 80kgha Low.csv") %>% 
+  mutate(strip_name = "Urea_80kgha_Low")
+
+#Join togther
+James_Dans_wk <- rbind(Urea_0kgha_High,
+                       Urea_0kgha_Low,
+                       Urea_150kgh_High,
+                       Urea_150kgh_Low,
+                       Urea_80kgha_High,
+                       Urea_80kgha_Low)
+str(James_Dans_wk)
+James_Dans_wk <- James_Dans_wk[,6:7]
+#split the clm Urea_0kgha_High 0kgha
+James_Dans_wk <- separate(James_Dans_wk, strip_name, into = paste(c("Fert", "Rate", "zone"), sep = "_"))
+#James_Dans_wk <- separate(James_Dans_wk, Rate, into = paste(c("P_Rate", "Units"), sep = "kgha"))
