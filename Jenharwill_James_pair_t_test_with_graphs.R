@@ -788,9 +788,12 @@ James_Dans_wk_summary <- group_by(James_Dans_wk, Rate, zone ) %>%
 James_Dans_wk_summary
 
 
-James_Dans_wk$Rate1_as_factor <- as.factor(James_Dans_wk$Rate1)
+unique(James_Dans_wk$Rate)
+James_Dans_wk <- mutate(James_Dans_wk, Rate = fct_relevel(Rate, c( "0kgha" , "80kgha", "150kgh")) )
+                                                                 
 
-James_Dans_wk_summary_graph <- ggplot( James_Dans_wk, aes(Rate1_as_factor, Yld_Mass_D))+
+filter(James_Dans_wk, zone == "Low") %>% 
+ggplot( aes(Rate, Yld_Mass_D))+
   geom_boxplot(alpha=0.1)+
   geom_point(colour = "blue", alpha = 0.1)+
   stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..),
@@ -799,28 +802,24 @@ James_Dans_wk_summary_graph <- ggplot( James_Dans_wk, aes(Rate1_as_factor, Yld_M
   ylim(2.5,6)+
   theme(axis.text=element_text(size=8),
         axis.title=element_text(size=10,))+
-  labs(x = "P rate",
+  labs(x = "N rate",
        y= "Yield t/ha",
-       title = "Dans")
-
-James_Dans_wk_summary_graph
+       title = "Dans  - Low")
 
 
+filter(James_Dans_wk, zone == "High") %>% 
+  ggplot( aes(Rate, Yld_Mass_D))+
+  geom_boxplot(alpha=0.1)+
+  geom_point(colour = "blue", alpha = 0.1)+
+  stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..),
+               width = .75, linetype = "dashed")+
+  theme_bw()+
+  ylim(2.5,6)+
+  theme(axis.text=element_text(size=8),
+        axis.title=element_text(size=10,))+
+  labs(x = "N rate",
+       y= "Yield t/ha",
+       title = "Dans  - High")
 
-Urea_80kgha_High <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 80kgha High.csv") %>% 
-  mutate(strip_name = "Urea_80kgha_High")
-Urea_80kgha_Low <- read_csv("W:/value_soil_testing_prj/Yield_data/Jenharwil/James 2/James 2_drop_box/Urea 80kgha Low.csv") %>% 
-  mutate(strip_name = "Urea_80kgha_Low")
 
-#Join togther
-James_Dans_wk <- rbind(Urea_0kgha_High,
-                       Urea_0kgha_Low,
-                       Urea_150kgh_High,
-                       Urea_150kgh_Low,
-                       Urea_80kgha_High,
-                       Urea_80kgha_Low)
-str(James_Dans_wk)
-James_Dans_wk <- James_Dans_wk[,6:7]
-#split the clm Urea_0kgha_High 0kgha
-James_Dans_wk <- separate(James_Dans_wk, strip_name, into = paste(c("Fert", "Rate", "zone"), sep = "_"))
-#James_Dans_wk <- separate(James_Dans_wk, Rate, into = paste(c("P_Rate", "Units"), sep = "kgha"))
+
