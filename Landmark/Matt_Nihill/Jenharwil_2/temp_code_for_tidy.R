@@ -14,6 +14,8 @@
 #install.packages("PairedData")
 #install.packages("RGraphics")
 #install.packages("gridExtra")
+#install.packages("rdrop2")
+
 
 library(dplyr)
 library(tidyverse)
@@ -24,9 +26,17 @@ library(cowplot)
 library(grid)
 library(RGraphics)
 library(gridExtra)
+library(rdrop2) 
 
 ###############################################################################################
 ##1a. Details about the site what it looks like in the database
+
+database_name_of_path <-
+  file.path(
+    "W:",
+    "value_soil_testing_prj",
+    "data_base")
+
 
 
 Organisation_db	  = "Landmark"
@@ -578,12 +588,28 @@ print(p_vlaue_text_zone_1)
  
 #####################################################################################################################################
 ### should get this from harms database
- #bring in data from the most current database
- "\\FSSA2-ADL\clw-share1\Microlab\value_soil_testing_prj\data_base\N&P 2019 data for analysis Vic and SA latest.xlsx"
- name_of_path_database <-
-   file.path("W:", "value_soil_testing_prj", "data_base", "26022020_NP_data_base.xlsx")
+ #bring in data from the most current database from dropbox
  
- harm_database <- read_excel(name_of_path_database, sheet = "2019 full data", range = cell_cols("A:O"))
+ #set up access to dropbox when is is password protected
+ token<-drop_auth()
+ saveRDS(token, "droptoken.rds")
+ 
+ token<-readRDS("droptoken.rds")
+ drop_acc(dtoken=token)
+ 
+ #download the database file from dropbox and save it to mircolab
+ drop_download(path = "GRDC Soil Plant Testing Project 9176604 (Agronomy Solutions)/2019 Data summary CSIRO/Template.xlsx", 
+               local_path = database_name_of_path,
+               dtoken = token)
+ 
+ #bring in the excel sheet as a r object
+ database_name_of_path
+ 
+harm_database <- read_excel(paste0(
+                            database_name_of_path,"/", "26022020_NP_data_base.xlsx"),
+                            sheet = "2019 full data", range = cell_cols("A:O"))
+
+
  str(harm_database)
  #fix up some names
  harm_database<-
@@ -604,12 +630,14 @@ print(p_vlaue_text_zone_1)
  
  ## Pull out the infor for the paddock I am testing..Craig Muir   1	Postlethwaite	Arthurs
  str(harm_database)
- Jenharwil_James2 <- filter(harm_database,
-                            Paddock_tested == "James 2") %>% 
+ site <- filter(harm_database,
+                            Paddock_tested == Zone_db) %>% 
    dplyr::select(5, 6: 11)
 
+ 
+ site
 
- Jenharwil_James2
+
 
 #make a table of the mean yield for zones
 mean_zone_av_1
@@ -629,12 +657,12 @@ mean_zone_av_1_2_display <- round(mean_zone_av_1_2_display,2)
 
 
 TSpecial <- ttheme_minimal(base_size = 8)
-table1 <- tableGrob(Jenharwil_James2 , rows = NULL, theme=TSpecial )
-table2 <- tableGrob(mean_zone_av_1_2, rows = NULL, theme=TSpecial)
+table1 <- tableGrob(site , rows = NULL, theme=TSpecial )
+table2 <- tableGrob(mean_zone_av_1_2_display, rows = NULL, theme=TSpecial)
 
 #get the name of the paddock...
 
-paddock <- "James_2"
+paddock <- Zone_db
 
 
 library(DT)
