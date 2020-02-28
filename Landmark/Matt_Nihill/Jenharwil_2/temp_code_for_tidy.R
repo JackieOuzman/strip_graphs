@@ -29,10 +29,10 @@ library(gridExtra)
 ##1a. Details about the site what it looks like in the database
 
 
-Organisation	  = "Landmark"
-Contact_Farmer  = "Matt Nihill   7"
-Paddock_tested  =	"Jenharwil 2"
-Zone            = "James 2"
+Organisation_db	  = "Landmark"
+Contact_Farmer_db  = "Matt Nihill   7"
+Paddock_tested_db  =	"Jenharwil 2"
+Zone_db            = "James 2"
 data_file       = "James_Yld_Seg_ID_zone.csv"
 
 Fert_legend_name <- "N Rates"
@@ -44,7 +44,7 @@ name_of_path <-
     "W:",
     "value_soil_testing_prj",
     "Yield_data",
-    Organisation,
+    Organisation_db,
     "Matt_Nihill",
     "Jenharwil_2",
     "James 2")
@@ -72,6 +72,12 @@ rate1 = 0
 rate2 = 150
 #rate3 = 110
 
+list_rates <- data.frame( rate_name = c("Grower_rate" , "rate1",  "rate2"),
+                          Rates = c(Grower_rate,rate1, rate2 ) )
+  
+  
+ 
+list_rates
 #Define the zones
 unique(seg_ID$Zone)
 zone1 <- "Low"
@@ -292,73 +298,56 @@ write.csv(seg_ID_t_test_summary, paste0(graph_path,"/t_test_segments.csv"))
 zone_1 <- filter(seg_ID, Zone == zone1 )
 zone_av_1 <- group_by(zone_1,SegmentID, Rates ) %>% 
    summarise_all(mean)
- 
- zone_av_1
- unique(zone_1$zone)
- 
- group_by(zone_av_1, Rates) %>% 
-  summarise(mean(Yld))
- 
-zone_av_1$P_Rate_as_factor <- as.factor(zone_av_1$P_Rates)
 
-
-zone_av_1 
-zone_av_1_rate1vsGR <- filter(zone_av_1, P_Rates == rate1 | P_Rates== Grower_rate )
-zone_av_1_rate2vsGR <- filter(zone_av_1, P_Rates == rate2 | P_Rates== Grower_rate )
-#zone_av_1_rate3vsGR <- filter(zone_av_1, P_Rates == rate3 | P_Rates== Grower_rate )
+#subset the zone 1 data
+zone_av_1_rate1vsGR <- filter(zone_av_1, Rates == rate1 | Rates== Grower_rate )
+zone_av_1_rate2vsGR <- filter(zone_av_1, Rates == rate2 | Rates== Grower_rate )
+#zone_av_1_rate3vsGR <- filter(zone_av_1, Rates == rate3 | Rates== Grower_rate )
  
-zone_av_1_rate2vsGR <- filter(zone_av_1_rate2vsGR, SegmentID != 80 )
+#ensure that the dataset is duplictaed
+list_SegmentID_values <- zone_av_1_rate1vsGR$SegmentID[duplicated(zone_av_1_rate1vsGR$SegmentID)] #this returns a list of values I want to keep
+zone_av_1_rate1vsGR <- zone_av_1_rate1vsGR %>% filter(SegmentID %in% list_SegmentID_values)
 
+list_SegmentID_values <- zone_av_1_rate2vsGR$SegmentID[duplicated(zone_av_1_rate2vsGR$SegmentID)] #this returns a list of values I want to keep
+zone_av_1_rate2vsGR <- zone_av_1_rate2vsGR %>% filter(SegmentID %in% list_SegmentID_values)
 
-# http://www.sthda.com/english/wiki/paired-samples-t-test-in-r
- 
- #test assumptions
- 
- 
- # # compute the difference
- # d <- with(zone_av, 
- #           YLDMASSDR[P_Rate == 0] - YLDMASSDR[P_Rate == 50])
- # # Shapiro-Wilk normality test for the differences
- # shapiro.test(d) # => p-value = 0.5161
- # 
- # I think this means that it is  normally distrubuted
- 
-zone_av_1_rate1vsGR_res <- t.test(YldMassDry ~ P_Rates, data = zone_av_1_rate1vsGR, paired = TRUE)
-zone_av_1_rate2vsGR_res <- t.test(YldMassDry ~ P_Rates, data = zone_av_1_rate2vsGR, paired = TRUE)
-#zone_av_1_rate3vsGR_res <- t.test(YldMassDry ~ P_Rates, data = zone_av_1_rate3vsGR, paired = TRUE)
+#run the paired t test
+zone_av_1_rate1vsGR_res <- t.test(Yld ~ Rates, data = zone_av_1_rate1vsGR, paired = TRUE)
+zone_av_1_rate2vsGR_res <- t.test(Yld ~ Rates, data = zone_av_1_rate2vsGR, paired = TRUE)
+#zone_av_1_rate3vsGR_res <- t.test(Yld ~ Rates, data = zone_av_1_rate3vsGR, paired = TRUE)
 
-
-
-#test 1 results
-zone_av_1_rate1vsGR_res
- #Report values from the t.test
+#####test 1 results
+# Report values from the t.test
 zone_av_1_rate1vsGR_res_sig <-
    data.frame(P_value = as.double(zone_av_1_rate1vsGR_res$p.value),
               Mean_diff = (zone_av_1_rate1vsGR_res$estimate)) %>%
    mutate(
+     rate_name = "rate1",
      rounded = abs(round(Mean_diff, 2)),
      Significant = case_when(P_value < 0.05 ~ "significant",
                         TRUE ~ "not significant"))
 zone_av_1_rate1vsGR_res_sig 
  
-#test 2 results
-zone_av_1_rate2vsGR_res
-#Report values from the t.test
+####test 2 results
+# Report values from the t.test
 zone_av_1_rate2vsGR_res_sig <-
   data.frame(P_value = as.double(zone_av_1_rate2vsGR_res$p.value),
              Mean_diff = (zone_av_1_rate2vsGR_res$estimate)) %>%
   mutate(
+    rate_name = "rate2",
     rounded = abs(round(Mean_diff, 2)),
     Significant = case_when(P_value < 0.05 ~ "significant",
                             TRUE ~ "not significant"))
 
-#test 3 results
+####test 3 results
+# Report values from the t.test
 # zone_av_1_rate3vsGR_res
 # #Report values from the t.test
 # zone_av_1_rate3vsGR_res_sig <-
 #   data.frame(P_value = as.double(zone_av_1_rate3vsGR_res$p.value),
 #              Mean_diff = (zone_av_1_rate3vsGR_res$estimate)) %>%
 #   mutate(
+#     rate_name = "rate3",
 #     rounded = abs(round(Mean_diff, 2)),
 #     Significant = case_when(P_value < 0.05 ~ "significant",
 #                             TRUE ~ "not significant"))
@@ -368,19 +357,19 @@ zone_av_1_rate2vsGR_res_sig
 #zone_av_1_rate3vsGR_res_sig
 
 # positive_negative_rate1_GRS <- 
-mean_zone_av_1 <-  group_by(zone_av_1, P_Rates) %>% 
-  summarise(mean(YldMassDry))
+mean_zone_av_1 <-  group_by(zone_av_1, Rates) %>% 
+  summarise(mean(Yld))
 mean_zone_av_1
-positive_neg_value_GR_rate1_zone1 <- ifelse(filter(mean_zone_av_1, P_Rates == Grower_rate) 
-                                            - filter(mean_zone_av_1, P_Rates == rate1)>0, "plus", "minus") 
+positive_neg_value_GR_rate1_zone1 <- ifelse(filter(mean_zone_av_1, Rates == Grower_rate) 
+                                            - filter(mean_zone_av_1, Rates == rate1)>0, "plus", "minus") 
 positive_neg_value_GR_rate1_zone1 <- positive_neg_value_GR_rate1_zone1[1,2]
 
-positive_neg_value_rate2_GR_zone1 <- ifelse(filter(mean_zone_av_1, P_Rates == rate2) 
-                                            - filter(mean_zone_av_1, P_Rates == Grower_rate)>0, "plus", "minus")
+positive_neg_value_rate2_GR_zone1 <- ifelse(filter(mean_zone_av_1, Rates == rate2) 
+                                            - filter(mean_zone_av_1, Rates == Grower_rate)>0, "plus", "minus")
 positive_neg_value_rate2_GR_zone1 <- positive_neg_value_rate2_GR_zone1[1,2]
 
-# positive_neg_value_rate3_GR_zone1 <- ifelse(filter(mean_zone_av_1, P_Rates == rate3) 
-#                                             - filter(mean_zone_av_1, P_Rates == Grower_rate)>0, "plus", "minus")
+# positive_neg_value_rate3_GR_zone1 <- ifelse(filter(mean_zone_av_1, Rates == rate3) 
+#                                             - filter(mean_zone_av_1, Rates == Grower_rate)>0, "plus", "minus")
 # positive_neg_value_rate3_GR_zone1 <- positive_neg_value_rate3_GR_zone1[1,2]
 
 
@@ -401,13 +390,10 @@ print(p_vlaue_text_zone_1)
  library(grid)
  Pvalue_on_graph <- grobTree(textGrob(p_vlaue_text_zone_1, x=0.1,  y=0.10, hjust=0,
                                       gp=gpar(col="black", fontsize=6, fontface="italic")))
- 
- 
- 
- 
- # Compute t-test - this is done for rate1 vs GS for all values in the strip
+ # Plot the results
  zone_av_1
- zone_1 <- ggplot( zone_av_1, aes(P_Rate_as_factor, YldMassDry))+
+ zone_av_1$Rate_as_factor  <- as.factor(zone_av_1$Rates)
+ zone_1 <- ggplot( zone_av_1, aes(Rate_as_factor, Yld))+
    geom_boxplot(alpha=0.1)+
    geom_point(colour = "blue", alpha = 0.1)+
    stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..),
@@ -416,132 +402,141 @@ print(p_vlaue_text_zone_1)
    ylim(2.5,6)+
    theme(axis.text=element_text(size=8),
          axis.title=element_text(size=10,))+
-   labs(x = "N rate",
+   labs(x = Fert_legend_name,
         y= "Yield t/ha",
         title = zone1)+
    annotation_custom(Pvalue_on_graph)
- 
- ##save the results of the zone strip work
  zone_1
+ 
+ ##save the graphs of the zone strip work
  ggsave(path= graph_path, filename = "t-test_zone_zone1_strip.png", device = "png" ,
         width = 20, height = 10, units = "cm")
+ 
+ #make a table of the mean yield for zones with t test reuslts
+ zone_av_1
+ mean_zone_av_1 <-  group_by(zone_av_1, Rates) %>% 
+   summarise(mean(Yld))
+ mean_zone_av_1 <- left_join(mean_zone_av_1,list_rates)
+ 
+ mean_zone_av_1and_res_sig <-  rbind(zone_av_1_rate1vsGR_res_sig, zone_av_1_rate2vsGR_res_sig)
+ mean_zone_av_1 <- left_join(mean_zone_av_1,mean_zone_av_1and_res_sig)
+ mean_zone_av_1 <- mutate(mean_zone_av_1, 
+                          Zone = zone1,
+                          Organisation =Organisation_db,
+                          Contact_Farmer = Contact_Farmer_db,
+                          Paddock_tested = Paddock_tested_db)
+ names(mean_zone_av_1)[2] <- "Yld"
  write.csv(zone_av_1, paste0(graph_path,"/t_testzone_zone1_av.csv"))
  
  
+ 
+ 
+ 
  ###########################################################################################################################################
- ##### Paired t test for zone strip 2 ####
+ ##4b.  Paired t test for zone strip Zone 2 ####
  
- zone_2 <- filter(seg_ID, zone == zone2 )
- #remove a few segements that are not duplicated...
- #zone_2 <- filter(zone_2, SegmentID != 85)
- 
- zone_av_2 <- group_by(zone_2,SegmentID, P_Rates ) %>% 
+ ##average the yield values in each line segment - this ensure I have the same number of points
+ # filter out data so we just have zone 2
+ zone_2 <- filter(seg_ID, Zone == zone2 )
+ zone_2
+ zone_av_2 <- group_by(zone_2,SegmentID, Rates ) %>% 
    summarise_all(mean)
  
- zone_av_2
- unique(zone_2$zone)
+ #subset the zone 1 data
+ zone_av_2_rate1vsGR <- filter(zone_av_2, Rates == rate1 | Rates== Grower_rate )
+ zone_av_2_rate2vsGR <- filter(zone_av_2, Rates == rate2 | Rates== Grower_rate )
+ #zone_av_2_rate3vsGR <- filter(zone_av_2, Rates == rate3 | Rates== Grower_rate )
  
- group_by(zone_av_2, P_Rates) %>% 
-   summarise(mean(YldMassDry))
+ #ensure that the dataset is duplictaed
+ list_SegmentID_values <- zone_av_2_rate1vsGR$SegmentID[duplicated(zone_av_2_rate1vsGR$SegmentID)] #this returns a list of values I want to keep
+ zone_av_2_rate1vsGR <- zone_av_2_rate1vsGR %>% filter(SegmentID %in% list_SegmentID_values)
  
- zone_av_2$P_Rate_as_factor <- as.factor(zone_av_2$P_Rates)
+ list_SegmentID_values <- zone_av_2_rate2vsGR$SegmentID[duplicated(zone_av_2_rate2vsGR$SegmentID)] #this returns a list of values I want to keep
+ zone_av_2_rate2vsGR <- zone_av_2_rate2vsGR %>% filter(SegmentID %in% list_SegmentID_values)
  
+ #run the paired t test
+ zone_av_2_rate1vsGR_res <- t.test(Yld ~ Rates, data = zone_av_2_rate1vsGR, paired = TRUE)
+ zone_av_2_rate2vsGR_res <- t.test(Yld ~ Rates, data = zone_av_2_rate2vsGR, paired = TRUE)
+ #zone_av_2_rate3vsGR_res <- t.test(Yld ~ Rates, data = zone_av_2_rate3vsGR, paired = TRUE)
  
- zone_av_2 
- zone_av_2_rate1vsGR <- filter(zone_av_2, P_Rates ==  rate1 | P_Rates==   Grower_rate)
- zone_av_2_rate2vsGR <- filter(zone_av_2, P_Rates ==  rate2 | P_Rates==  Grower_rate )
- #zone_av_2_rate3vsGR <- filter(zone_av_2, P_Rates ==  rate3 | P_Rates==  Grower_rate )
- 
- # http://www.sthda.com/english/wiki/paired-samples-t-test-in-r
- 
- #test assumptions
- 
- 
- # # compute the difference
- # d <- with(zone_av, 
- #           YLDMASSDR[P_Rate == 0] - YLDMASSDR[P_Rate == 50])
- # # Shapiro-Wilk normality test for the differences
- # shapiro.test(d) # => p-value = 0.5161
- # 
- # I think this means that it is  normally distrubuted
- 
- zone_av_2_rate1vsGR_res <- t.test(YldMassDry ~ P_Rates, data = zone_av_2_rate1vsGR, paired = TRUE)
- zone_av_2_rate2vsGR_res <- t.test(YldMassDry ~ P_Rates, data = zone_av_2_rate2vsGR, paired = TRUE)
- #zone_av_2_rate3vsGR_res <- t.test(YldMassDry ~ P_Rates, data = zone_av_2_rate3vsGR, paired = TRUE)
- 
- #test 1 results
- zone_av_2_rate1vsGR_res
- #Report values from the t.test
+ #####test 1 results
+ # Report values from the t.test
  zone_av_2_rate1vsGR_res_sig <-
    data.frame(P_value = as.double(zone_av_2_rate1vsGR_res$p.value),
               Mean_diff = (zone_av_2_rate1vsGR_res$estimate)) %>%
    mutate(
+     rate_name = "rate1",
      rounded = abs(round(Mean_diff, 2)),
      Significant = case_when(P_value < 0.05 ~ "significant",
                              TRUE ~ "not significant"))
  zone_av_2_rate1vsGR_res_sig 
  
- #test 2 results
- zone_av_2_rate2vsGR_res
- #Report values from the t.test
+ ####test 2 results
+ # Report values from the t.test
  zone_av_2_rate2vsGR_res_sig <-
    data.frame(P_value = as.double(zone_av_2_rate2vsGR_res$p.value),
               Mean_diff = (zone_av_2_rate2vsGR_res$estimate)) %>%
    mutate(
+     rate_name = "rate2",
      rounded = abs(round(Mean_diff, 2)),
      Significant = case_when(P_value < 0.05 ~ "significant",
                              TRUE ~ "not significant"))
- # #test 3 results
- # zone_av_2_rate2vsGR_res
+ 
+ ####test 3 results
+ # Report values from the t.test
+ # zone_av_2_rate3vsGR_res
  # #Report values from the t.test
  # zone_av_2_rate3vsGR_res_sig <-
  #   data.frame(P_value = as.double(zone_av_2_rate3vsGR_res$p.value),
  #              Mean_diff = (zone_av_2_rate3vsGR_res$estimate)) %>%
  #   mutate(
+ #     rate_name = "rate3",
  #     rounded = abs(round(Mean_diff, 2)),
  #     Significant = case_when(P_value < 0.05 ~ "significant",
  #                             TRUE ~ "not significant"))
  
  zone_av_2_rate1vsGR_res_sig 
- zone_av_2_rate2vsGR_res_sig 
- #zone_av_2_rate3vsGR_res_sig 
+ zone_av_2_rate2vsGR_res_sig
+ #zone_av_2_rate3vsGR_res_sig
  
-# positive_negative_rate1_GRS <- 
- mean_zone_av_2 <-  group_by(zone_av_2, P_Rates) %>% 
-   summarise(mean(YldMassDry))
- positive_neg_value_GR_rate1 <- ifelse(filter(mean_zone_av_2, P_Rates == Grower_rate) 
-                                       - filter(mean_zone_av_2, P_Rates == rate1)>0, "plus", "minus") 
- positive_neg_value_GR_rate1 <- positive_neg_value_GR_rate1[1,2]
+ # positive_negative_rate1_GRS <- 
+ mean_zone_av_2 <-  group_by(zone_av_2, Rates) %>% 
+   summarise(mean(Yld))
+ mean_zone_av_2
+ positive_neg_value_GR_rate1_zone2 <- ifelse(filter(mean_zone_av_2, Rates == Grower_rate) 
+                                             - filter(mean_zone_av_2, Rates == rate1)>0, "plus", "minus") 
+ positive_neg_value_GR_rate1_zone2 <- positive_neg_value_GR_rate1_zone2[1,2]
  
- positive_neg_value_rate2_GR <- ifelse(filter(mean_zone_av_2, P_Rates == rate2) 
-                                       - filter(mean_zone_av_2, P_Rates == Grower_rate)>0, "plus", "minus")
- positive_neg_value_rate2_GR <- positive_neg_value_rate2_GR[1,2]
-
- positive_neg_value_rate3_GR <- ifelse(filter(mean_zone_av_2, P_Rates == rate3) - filter(mean_zone_av_2, P_Rates == Grower_rate)>0, "plus", "minus")
- positive_neg_value_rate3_GR <- positive_neg_value_rate3_GR[1,2]
+ positive_neg_value_rate2_GR_zone2 <- ifelse(filter(mean_zone_av_2, Rates == rate2) 
+                                             - filter(mean_zone_av_2, Rates == Grower_rate)>0, "plus", "minus")
+ positive_neg_value_rate2_GR_zone2 <- positive_neg_value_rate2_GR_zone2[1,2]
  
-
+ # positive_neg_value_rate3_GR_zone2 <- ifelse(filter(mean_zone_av_2, Rates == rate3) 
+ #                                             - filter(mean_zone_av_2, Rates == Grower_rate)>0, "plus", "minus")
+ # positive_neg_value_rate3_GR_zone2 <- positive_neg_value_rate3_GR_zone2[1,2]
  
- p_vlaue_text_zone_2 <- paste0("Yield at N ", Grower_rate, " is  N ", rate1, " " ,positive_neg_value_GR_rate1, " ", zone_av_2_rate1vsGR_res_sig$rounded, " and is ", 
+ 
+ 
+ p_vlaue_text_zone_2 <- paste0("Yield at N ", Grower_rate, " is  N ", rate1, " " ,positive_neg_value_GR_rate1_zone2, " ", 
+                               zone_av_2_rate1vsGR_res_sig$rounded, " and is ", 
                                zone_av_2_rate1vsGR_res_sig$Significant, "\n",
                                
-                               "Yield at N ", rate2, " is  N ", Grower_rate, " " ,positive_neg_value_rate2_GR, " ", zone_av_2_rate2vsGR_res_sig$rounded, " and is ", 
+                               "Yield at N ", rate2, " is  N ", Grower_rate, " " ,positive_neg_value_rate2_GR_zone2, " ", 
+                               zone_av_2_rate2vsGR_res_sig$rounded, " and is ", 
                                zone_av_2_rate2vsGR_res_sig$Significant, collapse = "\n")
-                               
-                               # "Yield at P ", rate3, " is  P ", Grower_rate , " " ,positive_neg_value_rate3_GR, " ", zone_av_2_rate3vsGR_res_sig$rounded, " and is ", 
-                               # zone_av_2_rate3vsGR_res_sig$Significant, collapse = "\n")
+ 
+ # "Yield at P ", rate3, " is  P ", Grower_rate , " " ,positive_neg_value_rate3_GR_zone2, " ", 
+ # zone_av_2_rate3vsGR_res_sig$rounded, " and is ", 
+ # zone_av_2_rate3vsGR_res_sig$Significant, collapse = "\n")
  print(p_vlaue_text_zone_2)
  
  library(grid)
  Pvalue_on_graph <- grobTree(textGrob(p_vlaue_text_zone_2, x=0.1,  y=0.10, hjust=0,
                                       gp=gpar(col="black", fontsize=6, fontface="italic")))
- 
- 
- 
- 
- # Compute t-test - this is done for rate1 vs GS for all values in the strip
+ # Plot the results
  zone_av_2
- zone_2 <- ggplot( zone_av_2, aes(P_Rate_as_factor, YldMassDry))+
+ zone_av_2$Rate_as_factor  <- as.factor(zone_av_2$Rates)
+ zone_2 <- ggplot( zone_av_2, aes(Rate_as_factor, Yld))+
    geom_boxplot(alpha=0.1)+
    geom_point(colour = "blue", alpha = 0.1)+
    stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..),
@@ -550,16 +545,34 @@ print(p_vlaue_text_zone_1)
    ylim(2.5,6)+
    theme(axis.text=element_text(size=8),
          axis.title=element_text(size=10,))+
-   labs(x = "N rate",
+   labs(x = Fert_legend_name,
         y= "Yield t/ha",
         title = zone2)+
    annotation_custom(Pvalue_on_graph)
- 
- ##save the results of the zone strip work
  zone_2
+ 
+ ##save the graphs of the zone strip work
  ggsave(path= graph_path, filename = "t-test_zone_zone2_strip.png", device = "png" ,
         width = 20, height = 10, units = "cm")
+ 
+ #make a table of the mean yield for zones with t test reuslts
+ zone_av_2
+ mean_zone_av_2 <-  group_by(zone_av_2, Rates) %>% 
+   summarise(mean(Yld))
+ mean_zone_av_2 <- left_join(mean_zone_av_2,list_rates)
+ 
+ mean_zone_av_2and_res_sig <-  rbind(zone_av_2_rate1vsGR_res_sig, zone_av_2_rate2vsGR_res_sig)
+ mean_zone_av_2 <- left_join(mean_zone_av_2,mean_zone_av_2and_res_sig)
+ mean_zone_av_2 <- mutate(mean_zone_av_2, 
+                          Zone = zone2,
+                          Organisation =Organisation_db,
+                          Contact_Farmer = Contact_Farmer_db,
+                          Paddock_tested = Paddock_tested_db)
+ names(mean_zone_av_2)[2] <- "Yld"
  write.csv(zone_av_2, paste0(graph_path,"/t_testzone_zone2_av.csv"))
+ 
+ 
+ 
  
  
  
@@ -599,16 +612,20 @@ print(p_vlaue_text_zone_1)
  Jenharwil_James2
 
 #make a table of the mean yield for zones
-names(mean_zone_av_1) <- c("Rates", zone1)
-names(mean_zone_av_2) <- c("Rates", zone2)
+mean_zone_av_1
+mean_zone_av_2
+ 
+mean_zone_av_1_2 <- as.data.frame( rbind(mean_zone_av_1, mean_zone_av_2))
+write.csv(mean_zone_av_1_2, paste0(graph_path,"/mean_zone_av_1_2.csv"))
 
-mean_zone_av_1_2 <- left_join(mean_zone_av_1, mean_zone_av_2)
-mean_zone_av_1_2 <- round(mean_zone_av_1_2,2)
-mean_zone_av_1_2 <-  lapply(mean_zone_av_1_2, as.character)
-mean_zone_av_1_2 <- as.data.frame(mean_zone_av_1_2 )
+mean_zone_av_1_2_display <- dplyr::select(mean_zone_av_1_2,
+                                   Rates, 
+                                   Yld, 
+                                   Zone)
+mean_zone_av_1_2_display
+mean_zone_av_1_2_display <- spread(mean_zone_av_1_2_display, Zone, Yld)
+mean_zone_av_1_2_display <- round(mean_zone_av_1_2_display,2)
 
-  
-mean_zone_av_1_2
 
 
 TSpecial <- ttheme_minimal(base_size = 8)
