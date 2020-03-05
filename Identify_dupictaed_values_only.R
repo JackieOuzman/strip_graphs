@@ -47,7 +47,10 @@ library(rdrop2)
 test <- drop_read_csv(file = "GRDC Soil Plant Testing Project 9176604 (Agronomy Solutions)/2019 Data summary CSIRO/26022020_NP_data_base.csv", 
                       dtoken = token)
 
-
+name_of_path
+drop_download(path = "GRDC Soil Plant Testing Project 9176604 (Agronomy Solutions)/2019 Data summary CSIRO/Template.xlsx", 
+              local_path = name_of_path,
+              dtoken = token)
 
 
  
