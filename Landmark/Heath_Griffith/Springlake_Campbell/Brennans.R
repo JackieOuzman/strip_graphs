@@ -37,7 +37,7 @@ database_name_of_path <-
     "value_soil_testing_prj",
     "data_base")
 
-	   2	
+	   	
 
 
 Organisation_db	  = "Landmark"
@@ -470,15 +470,9 @@ print(p_vlaue_text_zone_1)
  
  write.csv(zone_av_1, paste0(graph_path,"/t_testzone_zone1_av.csv"))
  
- #write out to a directory of processed files.
  
  
- write.csv(mean_zone_av_1, paste0(finished_name_of_path,
-                             "/",
-                             site_details,
-                             "_",
-                             zone1,
-                             "_t_testzone_zone1_av.csv"))
+ 
 
  
  ###########################################################################################################################################
@@ -615,17 +609,17 @@ print(p_vlaue_text_zone_1)
  mean_zone_av_2 <- mutate(mean_zone_av_2, 
                           Zone = zone2,
                           Organisation =Organisation_db,
-                          Contact_Farmer = Contact_Farmer_db,
+                          Contact = Contact_db,
+                          Farmer = Farmer_db,
                           Paddock_tested = Paddock_tested_db)
+ 
+ 
+ 
+ 
  names(mean_zone_av_2)[2] <- "Yld"
  write.csv(zone_av_2, paste0(graph_path,"/t_testzone_zone2_av.csv"))
  
- write.csv(mean_zone_av_2, paste0(finished_name_of_path,
-                                  "/",
-                                  site_details,
-                                  "_",
-                                  zone2,
-                                  "_t_testzone_zone2_av.csv"))
+ 
  
  
  
@@ -646,13 +640,14 @@ print(p_vlaue_text_zone_1)
  #download the database file from dropbox and save it to mircolab
  drop_download(path = "GRDC_Soil_Plant_Testing_Database/NP_database_28022020.xlsx", 
                local_path = database_name_of_path,
-               dtoken = token)
+               dtoken = token,
+               overwrite = TRUE)
  
  #bring in the excel sheet as a r object
  database_name_of_path
  
 harm_database <- read_excel(paste0(
-                            database_name_of_path,"/", "26022020_NP_data_base.xlsx"),
+                            database_name_of_path,"/", "NP_database_28022020.xlsx"),
                             sheet = "2019 full data", range = cell_cols("A:O"))
 
 
@@ -682,7 +677,7 @@ harm_database <- read_excel(paste0(
 
  
  site
-
+ Paddock_tested_db
 
 
 #make a table of the mean yield for zones
@@ -690,7 +685,16 @@ mean_zone_av_1
 mean_zone_av_2
  
 mean_zone_av_1_2 <- as.data.frame( rbind(mean_zone_av_1, mean_zone_av_2))
-write.csv(mean_zone_av_1_2, paste0(graph_path,"/mean_zone_av_1_2.csv"))
+
+mean_zone_av_1_2
+write.csv(mean_zone_av_1_2, paste0(finished_name_of_path,
+                                 "/",
+                                 site_details,
+                                 "_",
+                                 zone2,
+                                 "mean_zone_av_1_2.csv"))
+
+
 
 mean_zone_av_1_2_display <- dplyr::select(mean_zone_av_1_2,
                                    Rates, 
@@ -708,7 +712,7 @@ table2 <- tableGrob(mean_zone_av_1_2_display, rows = NULL, theme=TSpecial)
 
 #get the name of the paddock...
 
-paddock <- Zone_db
+paddock <- Paddock_tested_db
 
 
 library(DT)
@@ -721,7 +725,7 @@ zone_2
 paddock
 
 
-collection <- grid.arrange(zone_2, zone_1,  table1, segments, table2,  nrow = 5, 
+collection <- grid.arrange(zone_1, zone_2,  table1, segments, table2,  nrow = 5, 
               layout_matrix = cbind(c(1,1,5,4,4), c(2,2,3,4,4)))
              
 collection
