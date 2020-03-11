@@ -426,11 +426,11 @@ positive_neg_value_rate2_GR_zone1 <- positive_neg_value_rate2_GR_zone1[1,2]
 
 
 
-p_vlaue_text_zone_1 <- paste0("Yield at N ", Grower_rate, " is  P ", rate1, " " ,positive_neg_value_GR_rate1_zone1, " ", 
+p_vlaue_text_zone_1 <- paste0("Yield at P ", Grower_rate, " is  P ", rate1, " " ,positive_neg_value_GR_rate1_zone1, " ", 
                               zone_av_1_rate1vsGR_res_sig$rounded, " and is ", 
                               zone_av_1_rate1vsGR_res_sig$Significant, "\n",
                               
-                              "Yield at N ", rate2, " is  P ", Grower_rate, " " ,positive_neg_value_rate2_GR_zone1, " ", 
+                              "Yield at P ", rate2, " is  P ", Grower_rate, " " ,positive_neg_value_rate2_GR_zone1, " ", 
                               zone_av_1_rate2vsGR_res_sig$rounded, " and is ", 
                               zone_av_1_rate2vsGR_res_sig$Significant, collapse = "\n")
                               
