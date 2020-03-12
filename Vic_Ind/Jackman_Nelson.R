@@ -474,9 +474,12 @@ print(p_vlaue_text_zone_1)
  mean_zone_av_1 <-  group_by(zone_av_1, Rates) %>% 
    summarise(mean(Yld))
  mean_zone_av_1 <- left_join(mean_zone_av_1,list_rates)
- 
- mean_zone_av_1and_res_sig <-  rbind(zone_av_1_rate1vsGR_res_sig, zone_av_1_rate2vsGR_res_sig)
+ mean_zone_av_1
+ mean_zone_av_1and_res_sig <-  rbind(zone_av_1_rate1vsGR_res_sig, 
+                                     zone_av_1_rate2vsGR_res_sig,
+                                     zone_av_1_rate3vsGR_res_sig)
  mean_zone_av_1 <- left_join(mean_zone_av_1,mean_zone_av_1and_res_sig)
+ mean_zone_av_1
  mean_zone_av_1 <- mutate(mean_zone_av_1, 
                           Zone = zone1,
                           Organisation =Organisation_db,
@@ -627,21 +630,24 @@ print(p_vlaue_text_zone_1)
    summarise(mean(Yld))
  mean_zone_av_2 <- left_join(mean_zone_av_2,list_rates)
  
- mean_zone_av_2and_res_sig <-  rbind(zone_av_2_rate1vsGR_res_sig, zone_av_2_rate2vsGR_res_sig)
- mean_zone_av_2 <- left_join(mean_zone_av_2,mean_zone_av_2and_res_sig)
+ 
+ mean_zone_av_2and_res_sig <-  rbind(zone_av_2_rate1vsGR_res_sig, 
+                                     zone_av_2_rate2vsGR_res_sig,
+                                     zone_av_2_rate3vsGR_res_sig)
+ mean_zone_av_2 <- left_join(mean_zone_av_2,mean_zone_av_1and_res_sig)
+ mean_zone_av_2
  mean_zone_av_2 <- mutate(mean_zone_av_2, 
                           Zone = zone2,
                           Organisation =Organisation_db,
                           Contact = Contact_db,
                           Farmer = Farmer_db)
- #,                          Paddock_tested = Paddock_tested_db)
- 
- 
- 
- 
+ #, Paddock_tested = Paddock_tested_db)
  names(mean_zone_av_2)[2] <- "Yld"
+ 
  mean_zone_av_2
  write.csv(zone_av_2, paste0(graph_path,"/t_testzone_zone2_av.csv"))
+ 
+ 
  
  
  
