@@ -728,7 +728,7 @@ paddock
 collection <- grid.arrange(zone_1, zone_2,  table1, segments, table2,  nrow = 5, 
               layout_matrix = cbind(c(1,1,5,4,4), c(2,2,3,4,4)))
              
-collection
+
 
 ggsave(path= graph_path, filename = paste0(paddock, "_collection.png"), device = "png", 
        width = 21, height = 15, units = "cm", collection)
