@@ -302,17 +302,17 @@ segments <- ggplot(seg_ID_t_test_summary, aes(SegmentID , Yld, group = P_Rate_as
   geom_line(size=1, alpha=0.4, aes( color = P_Rate_as_factor ))+
   scale_color_manual(values=c('darkgrey','green', 'blue', 'red'), name  = Fert_legend_name)+
   theme_bw()+
-  ylim(0.0,6)+
+  ylim(0.0,8)+
   labs(x= "Distance along the strip",
        y = "Yield t/ha",
        title = "",
        subtitle = "",
        caption = "")+
-   annotate("rect", xmin = zone1_min, xmax = zone1_max, ymin = 0, ymax = 6, #Zone 1
+   annotate("rect", xmin = zone1_min, xmax = zone1_max, ymin = 0, ymax = 8, #Zone 1
            alpha = .2) +
   annotate("text", x = zone1_range, y= 1,label = zone1)+
   
-   annotate("rect", xmin =zone2_min , xmax = zone2_max, ymin = 0, ymax = 6, #zone 2
+   annotate("rect", xmin =zone2_min , xmax = zone2_max, ymin = 0, ymax = 8, #zone 2
             alpha = .2)+
   annotate("text", x = zone2_range, y= 1,label = zone2)
 #+
@@ -413,11 +413,11 @@ positive_neg_value_rate2_GR_zone1 <- positive_neg_value_rate2_GR_zone1[1,2]
 
 
 
-p_vlaue_text_zone_1 <- paste0("Yield at N ", Grower_rate, " is  P ", rate1, " " ,positive_neg_value_GR_rate1_zone1, " ", 
+p_vlaue_text_zone_1 <- paste0("Yield at P ", Grower_rate, " is  P ", rate1, " " ,positive_neg_value_GR_rate1_zone1, " ", 
                               zone_av_1_rate1vsGR_res_sig$rounded, " and is ", 
                               zone_av_1_rate1vsGR_res_sig$Significant, "\n",
                               
-                              "Yield at N ", rate2, " is  P ", Grower_rate, " " ,positive_neg_value_rate2_GR_zone1, " ", 
+                              "Yield at P ", rate2, " is  P ", Grower_rate, " " ,positive_neg_value_rate2_GR_zone1, " ", 
                               zone_av_1_rate2vsGR_res_sig$rounded, " and is ", 
                               zone_av_1_rate2vsGR_res_sig$Significant, collapse = "\n")
                               
