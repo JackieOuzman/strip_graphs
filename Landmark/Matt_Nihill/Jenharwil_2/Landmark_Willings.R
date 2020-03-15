@@ -474,7 +474,8 @@ print(p_vlaue_text_zone_1)
    summarise(mean(Yld))
  mean_zone_av_1 <- left_join(mean_zone_av_1,list_rates)
  
- mean_zone_av_1and_res_sig <-  rbind(zone_av_1_rate1vsGR_res_sig, zone_av_1_rate2vsGR_res_sig)
+ #mean_zone_av_1and_res_sig <-  rbind(zone_av_1_rate1vsGR_res_sig, zone_av_1_rate2vsGR_res_sig)
+ mean_zone_av_1and_res_sig <-  zone_av_1_rate1vsGR_res_sig
  
  mean_zone_av_1 <- left_join(mean_zone_av_1,mean_zone_av_1and_res_sig)
  mean_zone_av_1 <- mutate(mean_zone_av_1, 
@@ -580,12 +581,12 @@ print(p_vlaue_text_zone_1)
  
  p_vlaue_text_zone_2 <- paste0("Yield at P ", Grower_rate, " is  P ", rate1, " " ,positive_neg_value_GR_rate1_zone2, " ", 
                                zone_av_2_rate1vsGR_res_sig$rounded, " and is ", 
-                               zone_av_2_rate1vsGR_res_sig$Significant, "\n",
+                               zone_av_2_rate1vsGR_res_sig$Significant, collapse = "\n")
                                
-                                "Yield at P ", rate2, " is  P ", Grower_rate, " " ,positive_neg_value_rate2_GR_zone2, " ", 
-                                zone_av_2_rate2vsGR_res_sig$rounded, " and is ", 
-                                zone_av_2_rate2vsGR_res_sig$Significant, collapse = "\n")
- 
+                                # "Yield at P ", rate2, " is  P ", Grower_rate, " " ,positive_neg_value_rate2_GR_zone2, " ", 
+                                # zone_av_2_rate2vsGR_res_sig$rounded, " and is ", 
+                                # zone_av_2_rate2vsGR_res_sig$Significant, collapse = "\n")
+                                # 
  # "Yield at P ", rate3, " is  P ", Grower_rate , " " ,positive_neg_value_rate3_GR_zone2, " ", 
  # zone_av_2_rate3vsGR_res_sig$rounded, " and is ", 
  # zone_av_2_rate3vsGR_res_sig$Significant, collapse = "\n")
@@ -622,8 +623,8 @@ print(p_vlaue_text_zone_1)
    summarise(mean(Yld))
  mean_zone_av_2 <- left_join(mean_zone_av_2,list_rates)
  
- mean_zone_av_2and_res_sig <-  rbind(zone_av_2_rate1vsGR_res_sig, zone_av_2_rate2vsGR_res_sig)
- 
+ #mean_zone_av_2and_res_sig <-  rbind(zone_av_2_rate1vsGR_res_sig, zone_av_2_rate2vsGR_res_sig)
+ mean_zone_av_2and_res_sig <-  zone_av_2_rate1vsGR_res_sig
  
  mean_zone_av_2 <- left_join(mean_zone_av_2,mean_zone_av_2and_res_sig)
  mean_zone_av_2 <- mutate(mean_zone_av_2, 
@@ -735,7 +736,7 @@ table2 <- tableGrob(mean_zone_av_1_2_display, rows = NULL, theme=TSpecial)
 #get the name of the paddock...
 
 paddock <- Paddock_tested_db
-paddock
+paddock <- "Willings_Willows"
 
 library(DT)
 test <- textGrob(paddock)
