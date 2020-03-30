@@ -36,29 +36,48 @@ install.libraries(libs)
 load.libraries(libs)
 #########################################################
 
-
 ###############################################################################################
 ##1a. Details about the site what it looks like in the database
+"W:\value_soil_testing_prj\Yield_data\MSF\Michael_Moodie_Todd_McDonald\Anderson\Dave Dows\processing\Dave_Yld_Seg_ID_zone.csv"
 
+#As it appears in the database
+Organisation_db	  = "MSF"
+Contact_db = "Michael_Moodie_Todd_McDonald"
+Farmer_db  =  "Anderson"
+Paddock_tested_db  =	"Dave Dows"
+#Zone_db            = 
+data_file       = "Dave_Yld_Seg_ID_zone.csv"
+
+#As it appears in the file directory I use it for name of files
+site_details <- paste0(Organisation_db,"_",
+                       Contact_db,"_",
+                       Farmer_db, "_",
+                       Paddock_tested_db)
+site_details
+##1b. set path for getting my spatial data and location of saving outputs
+name_of_path <-
+  file.path(
+    "W:",
+    "value_soil_testing_prj",
+    "Yield_data",
+    Organisation_db,
+    Contact_db,
+    Farmer_db,
+    Paddock_tested_db
+  )
+name_of_path
+
+#what are we testing - what fert ws implemented?
+Fert_legend_name <- "P Rates"
+
+#################################################################################################
+#These file loaction won't change from site to site
+#location of the database
 database_name_of_path <-
   file.path(
     "W:",
     "value_soil_testing_prj",
     "data_base")
-
-
-
-#As it appears in the database
-Organisation_db	  = "Landmark"
-Contact_db = "Claire Gutsche 6"
-Farmer_db  =  "Lister Trading 1"
-Paddock_tested_db  =	"Willings/Willows?"
-#Zone_db            = 
-data_file       = "Willings_Yld_Seg_ID_zone_max_dist.csv"
-
-Fert_legend_name <- "P Rates"
-
-
 #finished work with results
 finished_name_of_path <-
   file.path(
@@ -67,46 +86,32 @@ finished_name_of_path <-
     "Yield_data",
     "finished")
 
-#"W:\value_soil_testing_prj\Yield_data\Landmark\Matt_Nihill\Litster_Trading\Willings\Willings_Yld_Seg_ID_zone_max_dist.csv"
-#As it appears in the file directory
-site_details <- paste0(Organisation_db,"_",
-                       "Matt_Nihill","_",
-                       "Litster_Trading", "_",
-                       "Willings")
-
-##1b. set path for getting my spatial data and location of saving outputs
-
-name_of_path <-
-  file.path(
-    "W:",
-    "value_soil_testing_prj",
-    "Yield_data",
-    Organisation_db,
-    "Matt_Nihill",
-    "Litster_Trading",
-    "Willings"
-  )
 graph_path <-
   file.path(name_of_path)
+###########################################################################################################
+##Read in the file from the spatial work
 
-seg_ID <- read_csv(paste0(name_of_path, "/", data_file))
+seg_ID <- read_csv(paste0(name_of_path, "/", "processing",  "/", data_file))
 names(seg_ID)
+
 ##1c. make name consistant
-
-# P rates first
-unique(seg_ID$Rate)
-# seg_ID <- filter(seg_ID,
-#                  MAP_Urea == "40MAP_60Urea"|
-#                    MAP_Urea == "40MAP_0Urea" |
-#                    MAP_Urea == "40MAP_120Urea")
-                   
-
+#str.toLowerCase
 seg_ID <-
   rename(seg_ID, 
          "Rates" = "Rate", #new name = old name
          "Zone" =  "zone",
          "Yld" = "Yld_Mass_D"
   )
+
+seg_ID_test <-seg_ID %>% 
+  rename_at(vars(starts_with("R")), ~"test",
+           (vars(starts_with("z")), ~"test2"))#,
+           # vars(starts_with("D")), ~"Yield") 
+       
+head(seg_ID_test)
+#https://stackoverflow.com/questions/34275576/avoiding-error-when-using-rename-in-dplyr-and-column-doesnt-exist
+
+
 ##1c. Set up data so its generic growers rate, rate1, rate2, rate3, zone1, zone2
 
 #Define the rates
